@@ -1,0 +1,191 @@
+// Camel Finance — data model
+// SQLite is used for zero-config local development. Swap the datasource to
+// PostgreSQL (recommended: managed Postgres with PITR) before production —
+// only the `provider` and `url` below need to change, the schema is portable.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// NOTE: SQLite has no native enum type, so every "enum" field below is a
+// plain String constrained at the application layer by the unions in
+// src/types/enums.ts (and validated at the HTTP boundary by zod). Moving to
+// PostgreSQL later can reintroduce real `enum` blocks here if desired — the
+// application-level unions already mirror the same value sets, so nothing
+// else has to change.
+
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  phone             String?   @unique
+  fullName          String
+  passwordHash      String
+  kycStatus         String    @default("PENDING")
+  tier              String    @default("FREE")
+
+  // Gamification snapshot — denormalized on the user for fast dashboard reads;
+  // PointsEntry remains the source of truth / audit trail.
+  points            Int       @default(0)
+  level             Int       @default(1)
+  currentStreakDays Int       @default(0)
+  longestStreakDays Int       @default(0)
+  lastActivityAt    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  wallet         Wallet?
+  paymentMethods PaymentMethod[]
+  goals          Goal[]
+  policies       InsurancePolicy[]
+  bookings       Booking[]
+  userBadges     UserBadge[]
+  pointsLedger   PointsEntry[]
+}
+
+model Wallet {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id])
+  balanceCents Int      @default(0)
+  currency     String   @default("USD")
+  updatedAt    DateTime @updatedAt
+
+  transactions Transaction[]
+}
+
+model Transaction {
+  id               String            @id @default(cuid())
+  walletId         String
+  wallet           Wallet            @relation(fields: [walletId], references: [id])
+  type             String
+  provider         String
+  amountCents      Int
+  feeCents         Int               @default(0)
+  currency         String            @default("USD")
+  status           String            @default("PENDING")
+  interactionLevel String            @default("BASIC")
+
+  goalId    String?
+  goal      Goal?    @relation(fields: [goalId], references: [id])
+  bookingId String?
+  booking   Booking? @relation(fields: [bookingId], references: [id])
+
+  externalRef String? // reference id returned by the card/Wish Money/OMT adapter
+  metadata    String? // JSON-encoded adapter response, kept opaque at this layer
+
+  createdAt DateTime @default(now())
+}
+
+model PaymentMethod {
+  id          String          @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  provider    String
+  label       String // e.g. "Visa •••• 4242", "Wish Money +961 70 000 000"
+  detailsJson String // masked/non-sensitive details only — never raw PAN/OTP
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model Goal {
+  id                 String       @id @default(cuid())
+  userId             String
+  user               User         @relation(fields: [userId], references: [id])
+  name               String
+  category           String   @default("SAVINGS")
+  targetAmountCents  Int
+  currentAmountCents Int      @default(0)
+  targetDate         DateTime?
+  createdAt          DateTime @default(now())
+
+  linkedPolicy InsurancePolicy?
+  transactions Transaction[]
+}
+
+// A life / savings-plan insurance policy that can (optionally, and at any
+// later time) be attached to a savings Goal so its maturity value counts
+// toward that goal's projection.
+model InsurancePolicy {
+  id                  String           @id @default(cuid())
+  userId              String
+  user                User             @relation(fields: [userId], references: [id])
+  provider            String // partner insurer name
+  policyType          String
+  status              String    @default("PROPOSED")
+  coverageAmountCents Int
+  premiumAmountCents  Int
+  premiumFrequency    String    @default("MONTHLY")
+  startDate           DateTime?
+  maturityDate        DateTime?
+
+  goalId String? @unique
+  goal   Goal?   @relation(fields: [goalId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model Advisor {
+  id          String @id @default(cuid())
+  name        String
+  title       String
+  bio         String
+  specialties String // comma-separated tags, e.g. "budgeting,debt,insurance"
+
+  bookings Booking[]
+}
+
+// A premium, human-intervention session. Confirming a booking charges a
+// PREMIUM_HUMAN fee transaction — this is the "human intervention" tier.
+model Booking {
+  id              String        @id @default(cuid())
+  userId          String
+  user            User          @relation(fields: [userId], references: [id])
+  advisorId       String
+  advisor         Advisor       @relation(fields: [advisorId], references: [id])
+  scheduledAt     DateTime
+  durationMinutes Int      @default(30)
+  topic           String
+  status          String   @default("REQUESTED")
+  meetingLink     String?
+  feeCents        Int
+  createdAt       DateTime @default(now())
+
+  transactions Transaction[]
+}
+
+model Badge {
+  id           String @id @default(cuid())
+  code         String @unique
+  name         String
+  description  String
+  icon         String
+  pointsReward Int    @default(0)
+
+  userBadges UserBadge[]
+}
+
+model UserBadge {
+  id       String   @id @default(cuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id])
+  badgeId  String
+  badge    Badge    @relation(fields: [badgeId], references: [id])
+  earnedAt DateTime @default(now())
+
+  @@unique([userId, badgeId])
+}
+
+model PointsEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  points    Int
+  reason    String
+  createdAt DateTime @default(now())
+}

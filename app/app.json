@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "Camel Finance",
+    "slug": "camel-finance",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "scheme": "camelfinance",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "app.camelfinance.ios"
+    },
+    "android": {
+      "package": "app.camelfinance.android",
+      "adaptiveIcon": {
+        "backgroundColor": "#0B6E4F"
+      }
+    },
+    "extra": {
+      "apiBaseUrl": "http://localhost:4000"
+    }
+  }
+}
