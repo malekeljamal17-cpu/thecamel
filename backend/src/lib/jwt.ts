@@ -1,6 +1,18 @@
 import jwt, { type SignOptions } from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET ?? "change-me-in-production";
+// No hardcoded fallback: a secret baked into shipped source would let anyone
+// who reads the repo forge tokens for any user on a deployment that forgot
+// to set this. Fail fast instead of silently signing with a public value.
+const JWT_SECRET: string = (() => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret || secret.length < 32) {
+    throw new Error(
+      "JWT_SECRET env var must be set to a random string of at least 32 characters (see backend/.env.example). Refusing to start without one.",
+    );
+  }
+  return secret;
+})();
+
 const JWT_EXPIRES_IN = (process.env.JWT_EXPIRES_IN ?? "7d") as SignOptions["expiresIn"];
 
 export interface AuthTokenPayload {
