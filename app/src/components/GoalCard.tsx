@@ -10,6 +10,7 @@ const CATEGORY_ICON: Record<string, string> = {
   TRAVEL: "✈️",
   EDUCATION: "🎓",
   RETIREMENT: "🌴",
+  HOME_PURCHASE: "🏠",
   INSURANCE_LINKED: "🛡️",
   OTHER: "📌",
 };

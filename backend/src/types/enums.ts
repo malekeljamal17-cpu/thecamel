@@ -38,6 +38,7 @@ export const GOAL_CATEGORIES = [
   "TRAVEL",
   "EDUCATION",
   "RETIREMENT",
+  "HOME_PURCHASE",
   "INSURANCE_LINKED",
   "OTHER",
 ] as const;

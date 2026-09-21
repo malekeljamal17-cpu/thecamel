@@ -8,7 +8,7 @@ import { colors, radius, spacing } from "../theme/colors";
 import { GoalCard } from "../components/GoalCard";
 import { PrimaryButton } from "../components/PrimaryButton";
 
-const CATEGORIES: GoalCategory[] = ["SAVINGS", "EMERGENCY_FUND", "TRAVEL", "EDUCATION", "RETIREMENT", "OTHER"];
+const CATEGORIES: GoalCategory[] = ["SAVINGS", "EMERGENCY_FUND", "TRAVEL", "EDUCATION", "RETIREMENT", "HOME_PURCHASE", "OTHER"];
 
 export function GoalsScreen() {
   const navigation = useNavigation<any>();

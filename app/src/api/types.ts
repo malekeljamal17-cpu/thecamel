@@ -1,5 +1,5 @@
 export type PaymentProvider = "CARD" | "WISH_MONEY" | "OMT" | "INTERNAL";
-export type GoalCategory = "EMERGENCY_FUND" | "SAVINGS" | "TRAVEL" | "EDUCATION" | "RETIREMENT" | "INSURANCE_LINKED" | "OTHER";
+export type GoalCategory = "EMERGENCY_FUND" | "SAVINGS" | "TRAVEL" | "EDUCATION" | "RETIREMENT" | "HOME_PURCHASE" | "INSURANCE_LINKED" | "OTHER";
 export type PolicyType = "LIFE" | "SAVINGS_PLAN" | "LIFE_AND_SAVINGS";
 export type BookingStatus = "REQUESTED" | "CONFIRMED" | "COMPLETED" | "CANCELLED";
 

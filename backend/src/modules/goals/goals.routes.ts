@@ -7,7 +7,7 @@ export const goalsRouter = Router();
 
 goalsRouter.use(requireAuth);
 
-const categoryEnum = z.enum(["EMERGENCY_FUND", "SAVINGS", "TRAVEL", "EDUCATION", "RETIREMENT", "INSURANCE_LINKED", "OTHER"]);
+const categoryEnum = z.enum(["EMERGENCY_FUND", "SAVINGS", "TRAVEL", "EDUCATION", "RETIREMENT", "HOME_PURCHASE", "INSURANCE_LINKED", "OTHER"]);
 
 const createGoalSchema = z.object({
   name: z.string().min(2),
