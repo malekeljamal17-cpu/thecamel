@@ -474,6 +474,24 @@
       max-width: 420px;
       text-align: right;
     }
+
+    /* ── MOBILE RESPONSIVE ── */
+    @media (max-width: 640px) {
+      .fo-topbar { padding: 10px 16px; flex-wrap: wrap; row-gap: 8px; }
+      .fo-topbar-l { gap: 12px; flex-wrap: wrap; row-gap: 6px; }
+      .fo-topbar-nav { gap: 14px; flex-wrap: wrap; row-gap: 8px; }
+      .fo-topbar-label, .fo-topbar-nav a { font-size: 13px; }
+      .fo-hero { padding: 56px 20px 40px; min-height: auto; }
+      .fo-hero-corner { display: none; }
+      .fo-hero-meta { gap: 20px; margin-top: 40px; }
+      .fo-section, .fo-subpage-section { padding: 48px 20px; }
+      .fo-pillar { padding: 24px 18px; }
+      .fo-grid-2, .fo-grid-3 { grid-template-columns: 1fr; }
+      .fo-gov-header { padding: 18px 20px; }
+      .fo-gov-stat-single { padding: 16px 20px; }
+      .fo-footer { padding: 28px 20px; flex-direction: column; align-items: flex-start; }
+      .fo-footer-reg { text-align: left; max-width: 100%; }
+    }
   </style>
 </head>
 <body>
@@ -670,7 +688,7 @@
       <h2 class="fo-h2">How We <em>Think</em></h2>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:56px;max-width:960px;margin-bottom:56px;">
+    <div class="fo-grid-2" style="display:grid;gap:56px;max-width:960px;margin-bottom:56px;">
       <div>
         <p style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:300;color:#F0EBE2;line-height:1.75;margin-bottom:24px;">We do not chase cycles. We do not follow consensus. We deploy capital where we see <strong style="color:#C5A880;font-weight:400;">structural opportunity</strong> — and we hold with the patience that only a family office can afford.</p>
         <p style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:300;color:#F0EBE2;line-height:1.75;margin-bottom:24px;">Our philosophy is built on a single conviction: the most asymmetric returns in the GCC and Levant corridors are not found in listed markets. They are found at the <strong style="color:#C5A880;font-weight:400;">earliest stages of company formation</strong> — when the right capital, the right governance, and the right relationships can change the trajectory of an entire venture.</p>
@@ -684,7 +702,7 @@
     </div>
 
     <!-- Three philosophy pillars -->
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#1A2E52;border:1px solid #1A2E52;max-width:960px;">
+    <div class="fo-grid-3" style="display:grid;gap:1px;background:#1A2E52;border:1px solid #1A2E52;max-width:960px;">
       <div style="background:#0D2240;padding:32px 28px;position:relative;transition:background 0.2s;" onmouseover="this.style.background='#122848'" onmouseout="this.style.background='#0D2240'">
         <div style="position:absolute;top:0;left:0;width:2px;height:100%;background:#C5A880;"></div>
         <div style="font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:300;color:#1A2E52;line-height:1;margin-bottom:16px;">01</div>
@@ -797,7 +815,7 @@
       </div>
 
       <!-- Three confidentiality pillars -->
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#1A2E52;border:1px solid #1A2E52;margin-bottom:32px;">
+      <div class="fo-grid-3" style="display:grid;gap:1px;background:#1A2E52;border:1px solid #1A2E52;margin-bottom:32px;">
 
         <div style="background:#0D2240;padding:28px 24px;position:relative;">
           <div style="position:absolute;top:0;left:0;width:2px;height:100%;background:#C5A880;opacity:0.5;"></div>
@@ -834,14 +852,14 @@
   <div id="who-we-are" style="display:none;">
 
     <!-- Back bar -->
-    <div style="background:#102440; border-bottom:1px solid #1E3A5F; padding:12px 48px; display:flex; align-items:center; gap:12px;">
+    <div class="fo-subpage-section" style="background:#102440; border-bottom:1px solid #1E3A5F; padding:12px 48px; display:flex; align-items:center; gap:12px;">
       <a onclick="hideWhoWeAre()" href="#" style="font-family:'Cormorant Garamond',serif; font-size:16px; font-weight:300; color:#C5A880; text-decoration:none; letter-spacing:0.04em;">
         &larr; Return to Home
       </a>
     </div>
 
     <!-- Hero -->
-    <div style="background:#0D2240; padding:80px 48px 56px; position:relative; border-bottom:1px solid #1E3A5F; overflow:hidden;">
+    <div class="fo-subpage-section" style="background:#0D2240; padding:80px 48px 56px; position:relative; border-bottom:1px solid #1E3A5F; overflow:hidden;">
       <div style="position:absolute;inset:0;opacity:0.04;background-image:linear-gradient(#C5A880 1px,transparent 1px),linear-gradient(90deg,#C5A880 1px,transparent 1px);background-size:48px 48px;pointer-events:none;"></div>
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
         <div style="width:32px;height:1px;background:#C5A880;"></div>
@@ -853,13 +871,13 @@
     </div>
 
     <!-- Founding Story -->
-    <div style="padding:72px 48px;border-bottom:1px solid #1E3A5F;background:#0D2240;">
+    <div class="fo-subpage-section" style="padding:72px 48px;border-bottom:1px solid #1E3A5F;background:#0D2240;">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
         <div style="width:20px;height:1px;background:#C5A880;"></div>
         <span style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;color:#C5A880;">Our Founding Story</span>
       </div>
       <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(24px,3.5vw,36px);font-weight:300;color:#E8E3DA;letter-spacing:-0.01em;margin-bottom:40px;">Built on <em style="font-style:italic;color:#C5A880;">Conviction</em>, Not Circumstance</h2>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:56px;max-width:960px;">
+      <div class="fo-grid-2" style="display:grid;gap:56px;max-width:960px;">
         <div>
           <p style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:300;color:#F0EBE2;line-height:1.75;margin-bottom:24px;">The Camel Family Office was established in 2026 by the <strong style="color:#C5A880;font-weight:400;">Al Jamal family</strong> — a decision born not from sudden opportunity, but from years of quiet deliberation about what it truly means to steward wealth across generations.</p>
           <p style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:300;color:#F0EBE2;line-height:1.75;margin-bottom:24px;">The family's roots span the GCC and the Levant, two corridors that have shaped their worldview: the discipline and long-horizon thinking of the Gulf, and the resilience and adaptability forged through decades of turbulence in the Levant.</p>
@@ -874,7 +892,7 @@
     </div>
 
     <!-- Timeline -->
-    <div style="padding:72px 48px;border-bottom:1px solid #1E3A5F;background:#0F2845;">
+    <div class="fo-subpage-section" style="padding:72px 48px;border-bottom:1px solid #1E3A5F;background:#0F2845;">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
         <div style="width:20px;height:1px;background:#C5A880;"></div>
         <span style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;color:#C5A880;">Our Journey</span>
@@ -902,7 +920,7 @@
     </div>
 
     <!-- Founding Partners -->
-    <div style="padding:72px 48px;border-bottom:1px solid #1E3A5F;background:#0D2240;">
+    <div class="fo-subpage-section" style="padding:72px 48px;border-bottom:1px solid #1E3A5F;background:#0D2240;">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
         <div style="width:20px;height:1px;background:#C5A880;"></div>
         <span style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;color:#C5A880;">Founding Partners</span>
@@ -925,7 +943,7 @@
     </div>
 
     <!-- Pull Quote -->
-    <div style="padding:72px 48px;border-bottom:1px solid #1E3A5F;background:#0F2845;">
+    <div class="fo-subpage-section" style="padding:72px 48px;border-bottom:1px solid #1E3A5F;background:#0F2845;">
       <div style="max-width:720px;border-left:2px solid #C5A880;padding:8px 0 8px 36px;">
         <div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;font-style:italic;color:#F0EBE2;line-height:1.5;margin-bottom:16px;">"The camel does not rush. It conserves, endures, and arrives. We are in the business of arrival — not speed."</div>
         <div style="font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:#C5A880;font-weight:700;">The Al Jamal Family Assembly · Founding Principle · 2026</div>
