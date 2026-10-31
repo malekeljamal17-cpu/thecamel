@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Page Not Found — The Camel Family Office</title>
+  <meta name="robots" content="noindex, follow">
+  <meta name="theme-color" content="#0D2240">
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%2309090A'/><text x='50%' y='54%' dominant-baseline='middle' text-anchor='middle' font-size='18' fill='%23C5A880' font-family='serif'>C</text></svg>">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      background: #0D2240;
+      color: #8A8A8E;
+      font-family: 'Courier Prime', monospace;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px;
+      -webkit-font-smoothing: antialiased;
+    }
+    .fo-404 {
+      max-width: 520px;
+      text-align: center;
+      position: relative;
+    }
+    .fo-404-grid {
+      position: absolute;
+      inset: -80px;
+      opacity: 0.04;
+      pointer-events: none;
+      background-image:
+        linear-gradient(#C5A880 1px, transparent 1px),
+        linear-gradient(90deg, #C5A880 1px, transparent 1px);
+      background-size: 48px 48px;
+      z-index: -1;
+    }
+    .fo-404-eyebrow {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px;
+      color: #C5A880;
+      margin-bottom: 20px;
+    }
+    .fo-404-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(72px, 14vw, 120px);
+      font-weight: 300;
+      color: #F0EBE2;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    .fo-404-lead {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px;
+      font-weight: 300;
+      color: #F0EBE2;
+      line-height: 1.6;
+      margin-bottom: 36px;
+    }
+    .fo-404-lead em { font-style: italic; color: #C5A880; }
+    .fo-btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #C5A880;
+      color: #0D2240;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 17px;
+      padding: 13px 28px;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .fo-btn-primary:hover { background: #D4B990; }
+  </style>
+</head>
+<body>
+  <div class="fo-404">
+    <div class="fo-404-grid"></div>
+    <div class="fo-404-eyebrow">// 404</div>
+    <div class="fo-404-num">Lost</div>
+    <p class="fo-404-lead">The camel does not rush — but even patient travelers take a wrong turn. <em>This page does not exist.</em></p>
+    <a href="/" class="fo-btn-primary">Return to Home &rarr;</a>
+  </div>
+</body>
+</html>
