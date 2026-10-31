@@ -1077,6 +1077,20 @@
 
 
   <script>
+    var isNavigating = false;
+    var navigatingTimer = null;
+    function suspendScrollSpy() {
+      isNavigating = true;
+      clearTimeout(navigatingTimer);
+      navigatingTimer = setTimeout(function () { isNavigating = false; }, 1200);
+    }
+    if ('onscrollend' in window) {
+      window.addEventListener('scrollend', function () {
+        isNavigating = false;
+        clearTimeout(navigatingTimer);
+      });
+    }
+
     function setActiveNav(targetId) {
       document.querySelectorAll('#fo-sidebar-nav a').forEach(function (a) {
         a.classList.toggle('active', a.getAttribute('data-nav') === targetId);
@@ -1086,6 +1100,7 @@
       document.getElementById('main-content').style.display = 'block';
       document.getElementById('who-we-are').style.display = 'none';
       setActiveNav(id);
+      suspendScrollSpy();
       closeMobileNav();
       setTimeout(function() {
         var el = document.getElementById(id);
@@ -1099,6 +1114,7 @@
       document.getElementById('who-we-are').style.display = 'block';
       document.getElementById('main-content').style.display = 'none';
       setActiveNav('who-we-are');
+      suspendScrollSpy();
       closeMobileNav();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -1106,6 +1122,7 @@
       document.getElementById('who-we-are').style.display = 'none';
       document.getElementById('main-content').style.display = 'block';
       setActiveNav(null);
+      suspendScrollSpy();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -1134,6 +1151,7 @@
         .map(function (id) { return document.getElementById(id); })
         .filter(Boolean);
       var spyObserver = new IntersectionObserver(function (entries) {
+        if (isNavigating) { return; }
         entries.forEach(function (entry) {
           if (entry.isIntersecting) { setActiveNav(entry.target.id); }
         });
