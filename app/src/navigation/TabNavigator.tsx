@@ -32,7 +32,7 @@ export function TabNavigator() {
       <Tab.Screen name="Dashboard" component={DashboardScreen} />
       <Tab.Screen name="Wallet" component={WalletScreen} />
       <Tab.Screen name="Goals" component={GoalsScreen} />
-      <Tab.Screen name="Premium" component={PremiumBookingScreen} options={{ title: "Advisor" }} />
+      <Tab.Screen name="Premium" component={PremiumBookingScreen} options={{ title: "Coach" }} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );

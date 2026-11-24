@@ -19,18 +19,25 @@ npm run dev
 The API listens on `http://localhost:4000` by default. A demo account is
 seeded: `demo@camelfinance.app` / `password123`.
 
+**Phase 1 by default:** `FEATURE_WALLET_ENABLED=false`, so `/payments/deposit`
+and `/payments/withdraw` return 403, goal contributions are self-reported
+(no wallet debit), insurance has no `pay-premium` (use `request-referral`
+instead), and coaching-session fees are charged directly to a card, not a
+wallet. See `../docs/PHASED-LAUNCH.md` for why and how Phase 2 turns it on.
+
 ## Module map
 
 | Module | Responsibility |
 |---|---|
 | `modules/auth` | Signup/login (JWT), KYC gate |
-| `modules/wallet` | Balance + transaction history |
-| `modules/payments` | Deposit/withdraw via pluggable adapters (Card/Wish Money/OMT), payment methods |
+| `modules/wallet` | Balance + transaction history (mirrors the partner ledger — see `modules/ledger`) |
+| `modules/ledger` | `PartnerLedgerAdapter` — Phase 2 licensed banking/e-wallet partner integration point |
+| `modules/payments` | Deposit/withdraw via pluggable adapters (Card/Wish Money/OMT), payment methods — gated by `FEATURES.walletEnabled` |
 | `modules/fees` | Single source of truth for the fee schedule (`fee.service.ts`) |
 | `modules/gamification` | Points, levels, streaks, badges |
-| `modules/goals` | Savings goals, contributions, goal projections |
-| `modules/insurance` | Life/savings-plan policies, linking a policy to a goal, premium billing |
-| `modules/bookings` | Advisors, calendar slots, premium human-advisor sessions |
+| `modules/goals` | Savings goals, progress logging/contributions, goal projections |
+| `modules/insurance` | Life/savings-plan policies, linking a policy to a goal, insurer referrals |
+| `modules/bookings` | Money coaches, calendar slots, paid coaching sessions |
 | `modules/dashboard` | One aggregated read for the mobile app's home screen |
 
 ## Payment adapters

@@ -1,8 +1,12 @@
 import { prisma } from "../../lib/prisma";
 import { HttpError } from "../../middleware/errorHandler";
+import { FEATURES } from "../../config/features";
 import { computePremiumSessionFee } from "../fees/fee.service";
 import { awardBadge, awardPoints, recordActivity } from "../gamification/gamification.service";
 import { adjustWalletBalance, getWalletByUserId } from "../wallet/wallet.service";
+import { CardAdapter } from "../payments/adapters/card.adapter";
+
+const cardAdapter = new CardAdapter();
 
 const BUSINESS_HOURS = { startHour: 9, endHour: 17 }; // 9am–5pm, Beirut time is assumed app-side
 const SLOT_MINUTES = 30;
@@ -75,28 +79,60 @@ export async function createBooking(userId: string, input: { advisorId: string; 
   return booking;
 }
 
-export async function confirmBooking(userId: string, bookingId: string) {
+export async function confirmBooking(userId: string, bookingId: string, cardDetails?: Record<string, string>) {
   const booking = await getOwnedBooking(userId, bookingId);
   if (booking.status !== "REQUESTED") throw new HttpError(400, `Booking is already ${booking.status.toLowerCase()}`);
 
   const wallet = await getWalletByUserId(userId);
-  if (wallet.balanceCents < booking.feeCents) throw new HttpError(400, "Insufficient balance to confirm premium session");
 
-  await adjustWalletBalance(wallet.id, -booking.feeCents);
+  if (FEATURES.walletEnabled) {
+    // Phase 2: fund it from the (partner-held) wallet balance, same as any
+    // other wallet debit.
+    if (wallet.balanceCents < booking.feeCents) throw new HttpError(400, "Insufficient balance to confirm coaching session");
+    await adjustWalletBalance(wallet.id, -booking.feeCents);
 
-  await prisma.transaction.create({
-    data: {
-      walletId: wallet.id,
-      type: "PREMIUM_SESSION",
-      provider: "INTERNAL",
+    await prisma.transaction.create({
+      data: {
+        walletId: wallet.id,
+        type: "PREMIUM_SESSION",
+        provider: "INTERNAL",
+        amountCents: booking.feeCents,
+        feeCents: booking.feeCents,
+        currency: wallet.currency,
+        status: "COMPLETED",
+        interactionLevel: "PREMIUM_HUMAN",
+        bookingId: booking.id,
+      },
+    });
+  } else {
+    // Phase 1: no wallet to debit, so the coaching-session fee is a direct,
+    // one-off card charge — ordinary merchant payment processing, which
+    // (unlike holding a customer balance) doesn't require an e-money
+    // license. See docs/PHASED-LAUNCH.md.
+    const result = await cardAdapter.charge({
       amountCents: booking.feeCents,
-      feeCents: booking.feeCents,
       currency: wallet.currency,
-      status: "COMPLETED",
-      interactionLevel: "PREMIUM_HUMAN",
-      bookingId: booking.id,
-    },
-  });
+      reference: booking.id,
+      payerDetails: cardDetails ?? {},
+    });
+    if (!result.success) throw new HttpError(402, result.failureReason ?? "Card payment failed");
+
+    await prisma.transaction.create({
+      data: {
+        walletId: wallet.id,
+        type: "PREMIUM_SESSION",
+        provider: "CARD",
+        amountCents: booking.feeCents,
+        feeCents: 0,
+        currency: wallet.currency,
+        status: "COMPLETED",
+        interactionLevel: "PREMIUM_HUMAN",
+        bookingId: booking.id,
+        externalRef: result.externalRef,
+        metadata: JSON.stringify(result.rawResponse),
+      },
+    });
+  }
 
   const confirmed = await prisma.booking.update({
     where: { id: booking.id },
@@ -104,7 +140,7 @@ export async function confirmBooking(userId: string, bookingId: string) {
   });
 
   await awardBadge(userId, "PREMIUM_MEMBER");
-  await awardPoints(userId, 25, "Booked a premium advisory session");
+  await awardPoints(userId, 25, "Booked a coaching session");
   await recordActivity(userId);
 
   return confirmed;
@@ -117,8 +153,14 @@ export async function cancelBooking(userId: string, bookingId: string) {
   }
 
   if (booking.status === "CONFIRMED") {
-    const wallet = await getWalletByUserId(userId);
-    await adjustWalletBalance(wallet.id, booking.feeCents); // refund the session fee
+    if (FEATURES.walletEnabled) {
+      const wallet = await getWalletByUserId(userId);
+      await adjustWalletBalance(wallet.id, booking.feeCents); // refund the session fee
+    }
+    // Phase 1: the fee was a direct card charge, not a wallet credit, so
+    // there's no balance to refund here — a real cancellation would call
+    // the card processor's refund API, which isn't modeled in the mock
+    // adapter yet.
   }
 
   return prisma.booking.update({ where: { id: booking.id }, data: { status: "CANCELLED" } });

@@ -68,7 +68,7 @@ export function PremiumBookingScreen() {
       setTopic("");
       setSelectedSlot(null);
       await loadBookings();
-      Alert.alert("Session requested", "Confirm it below to lock in the slot and pay the advisory fee.");
+      Alert.alert("Session requested", "Confirm below to lock in the slot — it'll charge your card directly for the coaching fee.");
     } catch (err) {
       Alert.alert("Couldn't book", err instanceof ApiError ? err.message : "Please try again.");
     } finally {
@@ -103,10 +103,13 @@ export function PremiumBookingScreen() {
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.title}>⭐ Premium: talk to a human advisor</Text>
-        <Text style={styles.subtitle}>Book a real financial advisor for the moments that need more than an app.</Text>
+        <Text style={styles.title}>⭐ Money Coach: book a real person</Text>
+        <Text style={styles.subtitle}>
+          A budgeting/money coaching session for the moments that need more than an app — not investment or
+          insurance advice. Charged directly to your card, per session.
+        </Text>
 
-        <Text style={styles.sectionTitle}>1. Choose an advisor</Text>
+        <Text style={styles.sectionTitle}>1. Choose a coach</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.sm }}>
           {advisors.map((advisor) => (
             <Text

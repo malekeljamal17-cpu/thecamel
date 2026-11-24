@@ -11,6 +11,7 @@ import { BadgeRow } from "../components/BadgeRow";
 import { GoalCard } from "../components/GoalCard";
 import { PrimaryButton } from "../components/PrimaryButton";
 import { formatCents } from "../utils/money";
+import { FEATURES } from "../config/features";
 
 export function DashboardScreen() {
   const navigation = useNavigation<any>();
@@ -44,20 +45,32 @@ export function DashboardScreen() {
       >
         <Text style={styles.greeting}>Hi, {data.user.fullName.split(" ")[0]} 👋</Text>
 
-        <BalanceCard balanceCents={data.wallet.balanceCents} currency={data.wallet.currency} tier={data.user.tier} />
+        {FEATURES.walletEnabled ? (
+          <BalanceCard balanceCents={data.wallet.balanceCents} currency={data.wallet.currency} tier={data.user.tier} />
+        ) : (
+          <View style={styles.comingSoonCard}>
+            <Text style={styles.comingSoonTitle}>🏦 Banking features are launching soon</Text>
+            <Text style={styles.comingSoonBody}>
+              We're partnering with a licensed bank so Camel Finance never has to hold your money itself. Goals, coaching,
+              and insurance referrals are live today — wallet top-ups come next.
+            </Text>
+          </View>
+        )}
 
         <View style={styles.quickActions}>
+          {FEATURES.walletEnabled && (
+            <View style={{ flex: 1 }}>
+              <PrimaryButton label="Add Money" onPress={() => navigation.navigate("AddMoney")} />
+            </View>
+          )}
           <View style={{ flex: 1 }}>
-            <PrimaryButton label="Add Money" onPress={() => navigation.navigate("AddMoney")} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <PrimaryButton label="Book Advisor" variant="secondary" onPress={() => navigation.navigate("Premium")} />
+            <PrimaryButton label="Book a Coach" variant={FEATURES.walletEnabled ? "secondary" : "primary"} onPress={() => navigation.navigate("Premium")} />
           </View>
         </View>
 
         {data.user.kycStatus !== "VERIFIED" && (
           <View style={styles.kycBanner}>
-            <Text style={styles.kycText}>Verify your identity to unlock higher limits and premium sessions.</Text>
+            <Text style={styles.kycText}>Verify your identity to unlock higher limits and coaching sessions.</Text>
           </View>
         )}
 
@@ -99,7 +112,9 @@ export function DashboardScreen() {
         </View>
 
         <Text style={styles.footerNote}>
-          Total held: {formatCents(data.wallet.balanceCents, data.wallet.currency)}
+          {FEATURES.walletEnabled
+            ? `Total held: ${formatCents(data.wallet.balanceCents, data.wallet.currency)}`
+            : "No wallet yet — goal progress above is self-reported."}
         </Text>
       </ScrollView>
     </SafeAreaView>
@@ -113,6 +128,9 @@ const styles = StyleSheet.create({
   quickActions: { flexDirection: "row", gap: spacing.sm },
   kycBanner: { backgroundColor: "#FEF3C7", borderRadius: radius.md, padding: spacing.md },
   kycText: { color: "#92400E", fontSize: 13, fontWeight: "600" },
+  comingSoonCard: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.lg, borderWidth: 1, borderColor: colors.border, gap: spacing.xs },
+  comingSoonTitle: { fontWeight: "800", color: colors.textPrimary, fontSize: 15 },
+  comingSoonBody: { color: colors.textSecondary, fontSize: 12.5, lineHeight: 18 },
   bookingBanner: { backgroundColor: "#ECFDF5", borderRadius: radius.md, padding: spacing.md },
   bookingTitle: { fontWeight: "800", color: colors.primaryDark },
   bookingSubtitle: { color: colors.textSecondary, fontSize: 12, marginTop: 2 },

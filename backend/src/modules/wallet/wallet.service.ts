@@ -1,5 +1,6 @@
 import { prisma } from "../../lib/prisma";
 import { HttpError } from "../../middleware/errorHandler";
+import { partnerLedger } from "../ledger/partner.adapter";
 
 export async function getWalletSummary(userId: string) {
   const wallet = await prisma.wallet.findUniqueOrThrow({ where: { userId } });
@@ -22,29 +23,20 @@ export async function getWalletByUserId(userId: string) {
 }
 
 /**
- * Applies a balance change atomically at the database level, so concurrent
- * calls against the same wallet can never both read a stale pre-write
- * balance and both succeed (the classic check-then-act overdraft race).
- * Credits always succeed; debits are a single conditional UPDATE that only
- * matches (and only decrements) when the current balance still covers the
- * debit, so a losing concurrent request sees `count === 0` and fails
- * cleanly instead of racing past the check.
+ * The authoritative balance change happens on the partner ledger (see
+ * modules/ledger/partner.adapter.ts) — this backend never mutates a
+ * custodial balance it holds itself. `Wallet.balanceCents` in our own DB
+ * is a cached mirror of whatever the partner ledger reports, refreshed
+ * here after every successful call; it is not written as a source of
+ * truth anywhere else.
  */
 export async function adjustWalletBalance(walletId: string, deltaCents: number) {
   if (deltaCents >= 0) {
-    return prisma.wallet.update({
-      where: { id: walletId },
-      data: { balanceCents: { increment: deltaCents } },
-    });
+    await partnerLedger.credit(walletId, deltaCents, walletId);
+  } else {
+    await partnerLedger.debit(walletId, -deltaCents, walletId);
   }
 
-  const debitCents = -deltaCents;
-  const { count } = await prisma.wallet.updateMany({
-    where: { id: walletId, balanceCents: { gte: debitCents } },
-    data: { balanceCents: { decrement: debitCents } },
-  });
-
-  if (count === 0) throw new HttpError(400, "Insufficient balance");
-
-  return prisma.wallet.findUniqueOrThrow({ where: { id: walletId } });
+  const freshBalanceCents = await partnerLedger.getBalance(walletId);
+  return prisma.wallet.update({ where: { id: walletId }, data: { balanceCents: freshBalanceCents } });
 }

@@ -6,6 +6,11 @@ booking, savings goals, and an optional life/savings-plan insurance
 integration. This document maps the product brief to what's actually built
 in `../backend` and `../app`, and what's stubbed vs. real.
 
+**Current launch phase:** the app runs in Phase 1 (`FEATURES.walletEnabled
+= false` on both backend and app) — no wallet, no money custody, no BDL
+license required yet. See `PHASED-LAUNCH.md` for exactly what that
+disables and how Phase 2 turns it back on.
+
 ## System overview
 
 ```

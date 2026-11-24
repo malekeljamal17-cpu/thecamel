@@ -48,9 +48,12 @@ bookingsRouter.post("/", async (req, res, next) => {
   }
 });
 
+const confirmBookingSchema = z.object({ cardDetails: z.record(z.string()).optional() });
+
 bookingsRouter.post("/:id/confirm", async (req, res, next) => {
   try {
-    res.json(await confirmBooking(req.user!.sub, req.params.id));
+    const { cardDetails } = confirmBookingSchema.parse(req.body ?? {});
+    res.json(await confirmBooking(req.user!.sub, req.params.id, cardDetails));
   } catch (err) {
     next(err);
   }

@@ -53,7 +53,7 @@ export function GoalDetailScreen({ route, navigation }: Props) {
       setContribution("");
       await load();
     } catch (err) {
-      Alert.alert("Couldn't add contribution", err instanceof ApiError ? err.message : "Please try again.");
+      Alert.alert("Couldn't log progress", err instanceof ApiError ? err.message : "Please try again.");
     } finally {
       setBusy(false);
     }
@@ -83,7 +83,11 @@ export function GoalDetailScreen({ route, navigation }: Props) {
       </Text>
 
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>Add a contribution</Text>
+        <Text style={styles.cardTitle}>Log progress</Text>
+        <Text style={styles.cardBody}>
+          Record money you've saved toward this goal elsewhere — Camel Finance doesn't hold a wallet yet, so this just
+          updates your progress and points.
+        </Text>
         <View style={styles.contributeRow}>
           <TextInput
             style={styles.input}
@@ -92,7 +96,7 @@ export function GoalDetailScreen({ route, navigation }: Props) {
             value={contribution}
             onChangeText={setContribution}
           />
-          <PrimaryButton label="Add" onPress={onContribute} loading={busy} disabled={!contribution} />
+          <PrimaryButton label="Log" onPress={onContribute} loading={busy} disabled={!contribution} />
         </View>
       </View>
 

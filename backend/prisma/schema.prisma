@@ -52,9 +52,16 @@ model Wallet {
   id           String   @id @default(cuid())
   userId       String   @unique
   user         User     @relation(fields: [userId], references: [id])
-  balanceCents Int      @default(0)
-  currency     String   @default("USD")
-  updatedAt    DateTime @updatedAt
+
+  // Cached mirror of the partner ledger's balance (see
+  // src/modules/ledger/partner.adapter.ts) — not a custodial record. This
+  // backend never becomes the licensed holder of customer funds; a BDL-
+  // licensed banking/e-wallet partner does. Null until that partner
+  // relationship is actually onboarded (Phase 2 — see docs/PHASED-LAUNCH.md).
+  partnerAccountRef String?
+  balanceCents      Int      @default(0)
+  currency          String   @default("USD")
+  updatedAt         DateTime @updatedAt
 
   transactions Transaction[]
 }
@@ -111,10 +118,16 @@ model Goal {
 // A life / savings-plan insurance policy that can (optionally, and at any
 // later time) be attached to a savings Goal so its maturity value counts
 // toward that goal's projection.
+//
+// Phase 1 (see docs/PHASED-LAUNCH.md): Camel Finance never underwrites,
+// prices, or collects premiums for a policy — that stays with the
+// ICC-licensed insurer. This app only originates the referral and tracks
+// its status; `referredAt` is when the user asked to be connected to that
+// insurer, not a sale or a payment.
 model InsurancePolicy {
-  id                  String           @id @default(cuid())
+  id                  String    @id @default(cuid())
   userId              String
-  user                User             @relation(fields: [userId], references: [id])
+  user                User      @relation(fields: [userId], references: [id])
   provider            String // partner insurer name
   policyType          String
   status              String    @default("PROPOSED")
@@ -123,6 +136,7 @@ model InsurancePolicy {
   premiumFrequency    String    @default("MONTHLY")
   startDate           DateTime?
   maturityDate        DateTime?
+  referredAt          DateTime?
 
   goalId String? @unique
   goal   Goal?   @relation(fields: [goalId], references: [id])

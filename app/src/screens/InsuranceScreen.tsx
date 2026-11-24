@@ -48,13 +48,14 @@ export function InsuranceScreen() {
     }
   };
 
-  const onPayPremium = async (policyId: string) => {
+  const onRequestReferral = async (policyId: string) => {
     setBusy(true);
     try {
-      await api.post(`/insurance/${policyId}/pay-premium`);
-      Alert.alert("Premium paid", "Your policy premium was deducted from your wallet.");
+      await api.post(`/insurance/${policyId}/request-referral`);
+      Alert.alert("Request sent", "The insurer will reach out to set up your policy and bill you directly — Camel Finance doesn't handle the payment.");
+      await load();
     } catch (err) {
-      Alert.alert("Payment failed", err instanceof ApiError ? err.message : "Please try again.");
+      Alert.alert("Couldn't send request", err instanceof ApiError ? err.message : "Please try again.");
     } finally {
       setBusy(false);
     }
@@ -65,8 +66,9 @@ export function InsuranceScreen() {
       <View style={styles.intro}>
         <Text style={styles.introTitle}>Life & Savings-Plan Insurance</Text>
         <Text style={styles.introBody}>
-          Add a policy any time and optionally link it to a savings goal — its coverage counts toward that goal's target
-          and helps you get there faster.
+          Add a policy you're considering and optionally link it to a savings goal — its coverage counts toward that
+          goal's target. Camel Finance is a referral channel, not the insurer: your request goes to the insurance
+          provider you name, and they handle underwriting and billing directly with you.
         </Text>
         <PrimaryButton label={showForm ? "Cancel" : "+ Propose a Policy"} variant="secondary" onPress={() => setShowForm((s) => !s)} />
       </View>
@@ -99,10 +101,14 @@ export function InsuranceScreen() {
               {item.policyType.replace("_", " ")} · {item.status} · coverage {formatCents(item.coverageAmountCents)}
             </Text>
             <Text style={styles.policySubtitle}>
-              Premium: {formatCents(item.premiumAmountCents)} / {item.premiumFrequency.toLowerCase()}
-              {item.goalId ? " · linked to a goal" : ""}
+              Premium: {formatCents(item.premiumAmountCents)} / {item.premiumFrequency.toLowerCase()} (billed by the
+              insurer, not Camel Finance){item.goalId ? " · linked to a goal" : ""}
             </Text>
-            <PrimaryButton label="Pay Premium" variant="secondary" onPress={() => onPayPremium(item.id)} loading={busy} />
+            {item.status === "REFERRED" ? (
+              <Text style={styles.referredNote}>✓ Request sent — the insurer will follow up with you directly.</Text>
+            ) : (
+              <PrimaryButton label="Request a Quote" variant="secondary" onPress={() => onRequestReferral(item.id)} loading={busy} />
+            )}
           </View>
         )}
       />
@@ -143,4 +149,5 @@ const styles = StyleSheet.create({
   },
   policyTitle: { fontSize: 15, fontWeight: "800", color: colors.textPrimary },
   policySubtitle: { fontSize: 12, color: colors.textSecondary },
+  referredNote: { fontSize: 12, fontWeight: "700", color: colors.success },
 });

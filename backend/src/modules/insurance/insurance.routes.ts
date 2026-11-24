@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { requireAuth } from "../../middleware/auth";
-import { activatePolicy, linkPolicyToGoal, listPolicies, payPremium, proposePolicy } from "./insurance.service";
+import { linkPolicyToGoal, listPolicies, payPremium, proposePolicy, requestReferral } from "./insurance.service";
 
 export const insuranceRouter = Router();
 
@@ -37,9 +37,11 @@ insuranceRouter.post("/", async (req, res, next) => {
   }
 });
 
-insuranceRouter.post("/:id/activate", async (req, res, next) => {
+// Phase 1: this is a lead handoff to the insurer, not a purchase — see the
+// docblock in insurance.service.ts.
+insuranceRouter.post("/:id/request-referral", async (req, res, next) => {
   try {
-    res.json(await activatePolicy(req.user!.sub, req.params.id));
+    res.json(await requestReferral(req.user!.sub, req.params.id));
   } catch (err) {
     next(err);
   }

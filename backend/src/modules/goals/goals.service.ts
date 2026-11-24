@@ -1,6 +1,7 @@
 import { prisma } from "../../lib/prisma";
 import type { GoalCategory } from "../../types/enums";
 import { HttpError } from "../../middleware/errorHandler";
+import { FEATURES } from "../../config/features";
 import { classifyInteractionLevel, computeTransactionFee } from "../fees/fee.service";
 import { awardBadge, awardPoints, recordActivity } from "../gamification/gamification.service";
 import { adjustWalletBalance, getWalletByUserId } from "../wallet/wallet.service";
@@ -42,27 +43,50 @@ export async function contributeToGoal(userId: string, goalId: string, amountCen
   const goal = await getGoal(userId, goalId);
   const wallet = await getWalletByUserId(userId);
 
-  const interactionLevel = classifyInteractionLevel(amountCents, "GOAL_CONTRIBUTION");
-  const feeQuote = computeTransactionFee({ provider: "INTERNAL", type: "GOAL_CONTRIBUTION", amountCents, interactionLevel });
-  const totalDebit = amountCents + feeQuote.feeCents;
+  if (FEATURES.walletEnabled) {
+    // Phase 2: fund the contribution from the actual (partner-held) wallet
+    // balance, same as any other wallet debit.
+    const interactionLevel = classifyInteractionLevel(amountCents, "GOAL_CONTRIBUTION");
+    const feeQuote = computeTransactionFee({ provider: "INTERNAL", type: "GOAL_CONTRIBUTION", amountCents, interactionLevel });
+    const totalDebit = amountCents + feeQuote.feeCents;
 
-  if (wallet.balanceCents < totalDebit) throw new HttpError(400, "Insufficient balance");
+    if (wallet.balanceCents < totalDebit) throw new HttpError(400, "Insufficient balance");
+    await adjustWalletBalance(wallet.id, -totalDebit);
 
-  await adjustWalletBalance(wallet.id, -totalDebit);
-
-  await prisma.transaction.create({
-    data: {
-      walletId: wallet.id,
-      type: "GOAL_CONTRIBUTION",
-      provider: "INTERNAL",
-      amountCents,
-      feeCents: feeQuote.feeCents,
-      currency: wallet.currency,
-      status: "COMPLETED",
-      interactionLevel,
-      goalId: goal.id,
-    },
-  });
+    await prisma.transaction.create({
+      data: {
+        walletId: wallet.id,
+        type: "GOAL_CONTRIBUTION",
+        provider: "INTERNAL",
+        amountCents,
+        feeCents: feeQuote.feeCents,
+        currency: wallet.currency,
+        status: "COMPLETED",
+        interactionLevel,
+        goalId: goal.id,
+      },
+    });
+  } else {
+    // Phase 1: Camel Finance doesn't hold customer funds yet (see
+    // docs/PHASED-LAUNCH.md), so a "contribution" here is a self-reported
+    // progress log — the user is telling us they saved this amount toward
+    // the goal elsewhere. No money moves through us and there's no fee;
+    // this only drives the goal's progress bar and gamification.
+    await prisma.transaction.create({
+      data: {
+        walletId: wallet.id,
+        type: "GOAL_CONTRIBUTION",
+        provider: "INTERNAL",
+        amountCents,
+        feeCents: 0,
+        currency: wallet.currency,
+        status: "COMPLETED",
+        interactionLevel: "BASIC",
+        goalId: goal.id,
+        metadata: JSON.stringify({ selfReported: true }),
+      },
+    });
+  }
 
   const wasAlreadyAchieved = goal.currentAmountCents >= goal.targetAmountCents;
   const updated = await prisma.goal.update({

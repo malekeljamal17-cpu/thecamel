@@ -1,11 +1,26 @@
 import { Router } from "express";
 import { z } from "zod";
 import { requireAuth } from "../../middleware/auth";
+import { FEATURES } from "../../config/features";
+import { HttpError } from "../../middleware/errorHandler";
 import { addPaymentMethod, depositFunds, listPaymentMethods, withdrawFunds } from "./payments.service";
 
 export const paymentsRouter = Router();
 
 paymentsRouter.use(requireAuth);
+
+// Phase 1 ships with no wallet: Camel Finance doesn't hold customer funds
+// until a licensed banking/e-wallet partner is integrated (see
+// docs/PHASED-LAUNCH.md). These two routes are the actual custody
+// boundary, so they're the ones gated — adding a payment method label is
+// harmless metadata and stays available.
+function requireWalletEnabled(_req: unknown, _res: unknown, next: (err?: unknown) => void) {
+  if (!FEATURES.walletEnabled) {
+    next(new HttpError(403, "Wallet top-ups aren't live yet — Camel Finance is launching with a licensed banking partner first. Check back soon."));
+    return;
+  }
+  next();
+}
 
 const providerEnum = z.enum(["CARD", "WISH_MONEY", "OMT", "INTERNAL"]);
 
@@ -40,7 +55,7 @@ const depositSchema = z.object({
   payerDetails: z.record(z.string()).optional(),
 });
 
-paymentsRouter.post("/deposit", async (req, res, next) => {
+paymentsRouter.post("/deposit", requireWalletEnabled, async (req, res, next) => {
   try {
     const input = depositSchema.parse(req.body);
     res.status(201).json(await depositFunds(req.user!.sub, input));
@@ -56,7 +71,7 @@ const withdrawSchema = z.object({
   payoutDetails: z.record(z.string()).optional(),
 });
 
-paymentsRouter.post("/withdraw", async (req, res, next) => {
+paymentsRouter.post("/withdraw", requireWalletEnabled, async (req, res, next) => {
   try {
     const input = withdrawSchema.parse(req.body);
     res.status(201).json(await withdrawFunds(req.user!.sub, input));

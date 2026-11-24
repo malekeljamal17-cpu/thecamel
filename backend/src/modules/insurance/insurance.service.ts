@@ -1,6 +1,7 @@
 import { prisma } from "../../lib/prisma";
 import type { PolicyType, PremiumFrequency } from "../../types/enums";
 import { HttpError } from "../../middleware/errorHandler";
+import { FEATURES } from "../../config/features";
 import { computeTransactionFee } from "../fees/fee.service";
 import { awardBadge, recordActivity } from "../gamification/gamification.service";
 import { adjustWalletBalance, getWalletByUserId } from "../wallet/wallet.service";
@@ -9,10 +10,17 @@ import { adjustWalletBalance, getWalletByUserId } from "../wallet/wallet.service
  * Life / savings-plan insurance is modeled as a first-class product that can
  * be added at any time — proposed on its own, then optionally linked to a
  * Goal so its coverage/maturity value counts toward that goal's projection
- * (see goals.service#projectGoal). Underwriting itself (risk assessment,
- * pricing, regulatory filing with Lebanon's ICC) happens with a licensed
- * insurance partner — this models the policy record and premium billing on
- * our side of that partnership.
+ * (see goals.service#projectGoal).
+ *
+ * Phase 1 (see docs/PHASED-LAUNCH.md): Camel Finance is a referral channel
+ * to an ICC-licensed insurer, nothing more — we never underwrite, price,
+ * or collect a premium ourselves. `requestReferral` is the entire "sale"
+ * on our side; the insurer's own licensed staff closes and bills the
+ * policy directly with the customer. There used to be a `payPremium`
+ * endpoint that debited the user's wallet for the premium — that's
+ * exactly the kind of money-handling that would make us look like an
+ * insurance intermediary, so it's gone unless/until that's a deliberate,
+ * licensed Phase 2 decision.
  */
 export async function proposePolicy(userId: string, input: {
   provider: string;
@@ -42,11 +50,16 @@ export async function listPolicies(userId: string) {
   return prisma.insurancePolicy.findMany({ where: { userId }, orderBy: { createdAt: "desc" } });
 }
 
-export async function activatePolicy(userId: string, policyId: string) {
+/**
+ * The user asked to be connected to the insurer for this policy. This is a
+ * lead handoff, not a sale — the insurer takes it from here (underwriting,
+ * pricing, collecting the first premium) outside this app entirely.
+ */
+export async function requestReferral(userId: string, policyId: string) {
   const policy = await getOwnedPolicy(userId, policyId);
   return prisma.insurancePolicy.update({
     where: { id: policy.id },
-    data: { status: "ACTIVE", startDate: policy.startDate ?? new Date() },
+    data: { status: "REFERRED", referredAt: new Date() },
   });
 }
 
@@ -57,7 +70,7 @@ export async function linkPolicyToGoal(userId: string, policyId: string, goalId:
 
   const updated = await prisma.insurancePolicy.update({
     where: { id: policy.id },
-    data: { goalId, status: policy.status === "PROPOSED" ? "ACTIVE" : policy.status },
+    data: { goalId },
   });
 
   await awardBadge(userId, "PROTECTED");
@@ -66,7 +79,17 @@ export async function linkPolicyToGoal(userId: string, policyId: string, goalId:
   return updated;
 }
 
+/**
+ * Phase 2 only (FEATURES.walletEnabled): once Camel Finance actually has a
+ * licensed structure for it, premiums could be paid in-app from the
+ * wallet. Throws in Phase 1 — see the module docblock above for why
+ * premium collection isn't something we do ourselves yet.
+ */
 export async function payPremium(userId: string, policyId: string) {
+  if (!FEATURES.walletEnabled) {
+    throw new HttpError(403, "Paying premiums in-app isn't available yet — your insurer bills you directly for now.");
+  }
+
   const policy = await getOwnedPolicy(userId, policyId);
   const wallet = await getWalletByUserId(userId);
 

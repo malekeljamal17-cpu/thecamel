@@ -47,7 +47,7 @@ export type GoalCategory = (typeof GOAL_CATEGORIES)[number];
 export const POLICY_TYPES = ["LIFE", "SAVINGS_PLAN", "LIFE_AND_SAVINGS"] as const;
 export type PolicyType = (typeof POLICY_TYPES)[number];
 
-export const POLICY_STATUSES = ["PROPOSED", "ACTIVE", "LAPSED", "MATURED", "CANCELLED"] as const;
+export const POLICY_STATUSES = ["PROPOSED", "REFERRED", "ACTIVE", "LAPSED", "MATURED", "CANCELLED"] as const;
 export type PolicyStatus = (typeof POLICY_STATUSES)[number];
 
 export const PREMIUM_FREQUENCIES = ["MONTHLY", "QUARTERLY", "ANNUALLY"] as const;
