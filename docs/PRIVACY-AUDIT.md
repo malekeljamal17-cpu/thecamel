@@ -1,5 +1,9 @@
 # Privacy audit — Camel Finance vs. Lebanon's Law No. 81/2018
 
+**Status: the gaps below were fixed on this branch — see "Fixes applied"
+at the bottom.** The rest of this document is kept as the original audit
+record of what was wrong and why.
+
 This audits the actual data the app collects and stores (as of this
 branch) against Lebanon's Law No. 81 of 2018 on Electronic Transactions
 and Personal Data (Title 5, "Protection of Personal Data"). As with
@@ -112,3 +116,50 @@ it only shows KYC status, tier, and a log-out button.
 5. When real hosting is chosen, name the host/country in the privacy
    policy, the way the landing page's `privacy.html` already does for its
    own stack.
+
+## Fixes applied
+
+Every numbered gap above was closed on this branch:
+
+1. **Consent at signup** — `User.privacyConsentAt` (new column,
+   migration `20261124113611_privacy_consent`). The signup endpoint now
+   requires `privacyConsent: true` (`z.literal(true)` in
+   `auth.routes.ts`) and stamps the timestamp in `auth.service.ts#signup`.
+   The app's `SignupScreen` has a required checkbox with a tappable link
+   to the policy; "Sign up" stays disabled until it's checked.
+2. **Access + erasure rights** — `GET /auth/me/export` returns the user's
+   full data (profile minus `passwordHash`, wallet, transactions, goals,
+   policies, bookings, badges, points ledger) as one JSON document.
+   `DELETE /auth/me` permanently deletes every row the account owns, in
+   FK-safe order inside a single transaction. Both are wired into
+   `ProfileScreen` ("Export my data" shares the JSON via the native share
+   sheet; "Delete my account" confirms, then deletes and logs out).
+   Verified live: signup → export → delete → a login attempt afterward
+   correctly fails with "Invalid email or password," and the delete was
+   also tested against an account with an active booking and insurance
+   policy (the harder FK case) with no errors.
+3. **Privacy policy in the app** — `app/src/screens/PrivacyPolicyScreen.tsx`,
+   reachable from both the Signup screen and Profile, before and after
+   login. Written to actually answer this document's own findings (what's
+   collected, what's deliberately not collected, who it's shared with,
+   retention, rights, hosting) rather than generic boilerplate.
+4. **Free-text sensitive-data risk** — can't be eliminated (it's free
+   text), so both entry points now carry an explicit warning: the Goal
+   name field ("Avoid including health or other sensitive details in the
+   name") and the coaching-session topic field ("Avoid sharing health,
+   legal, or other sensitive details"). The account-deletion flow from
+   fix #2 is also the actual remedy if something sensitive does get typed
+   in.
+5. **Insurance referral scope** — unchanged by design; already didn't
+   collect health data, and the new privacy policy now says so
+   explicitly instead of leaving it implicit.
+6. **Retention policy** — stated in the privacy policy: kept until
+   account deletion, with a placeholder for a longer mandatory retention
+   period if Lebanese financial recordkeeping rules require one once
+   wallet/KYC features are live.
+7. **Cross-border hosting disclosure** — still genuinely not fixable
+   until real hosting is chosen (there's nothing true to disclose yet).
+   The privacy policy now has a dedicated section committing to name the
+   host and country once one exists, so this isn't silently missing —
+   it's an explicit, visible placeholder.
+

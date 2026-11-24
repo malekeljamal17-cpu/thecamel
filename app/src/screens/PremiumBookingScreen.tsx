@@ -159,6 +159,7 @@ export function PremiumBookingScreen() {
         </View>
 
         <TextInput style={styles.input} placeholder="What do you want to talk about?" value={topic} onChangeText={setTopic} />
+        <Text style={styles.hint}>Avoid sharing health, legal, or other sensitive details — coaches only see what you type here.</Text>
 
         <PrimaryButton label="Request Session" onPress={onRequestBooking} loading={busy} disabled={!selectedSlot || !topic} />
 
@@ -237,6 +238,7 @@ const styles = StyleSheet.create({
   },
   chipSelected: { color: "#fff", backgroundColor: colors.primary, borderColor: colors.primary },
   input: { borderWidth: 1, borderColor: colors.border, borderRadius: radius.md, padding: spacing.md, backgroundColor: colors.surface, marginTop: spacing.sm },
+  hint: { fontSize: 11, color: colors.textSecondary, marginTop: 4 },
   empty: { fontSize: 12, color: colors.textSecondary },
   bookingCard: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.md, borderWidth: 1, borderColor: colors.border, gap: 4 },
   bookingTitle: { fontWeight: "800", color: colors.textPrimary },

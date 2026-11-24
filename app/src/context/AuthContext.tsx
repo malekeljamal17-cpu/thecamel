@@ -6,7 +6,7 @@ interface AuthContextValue {
   user: AuthUser | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  signup: (input: { email: string; fullName: string; password: string; phone?: string }) => Promise<void>;
+  signup: (input: { email: string; fullName: string; password: string; phone?: string; privacyConsent: true }) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: (user: AuthUser) => void;
 }
@@ -42,7 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(result.user);
   }, []);
 
-  const signup = useCallback(async (input: { email: string; fullName: string; password: string; phone?: string }) => {
+  const signup = useCallback(async (input: { email: string; fullName: string; password: string; phone?: string; privacyConsent: true }) => {
     const result = await api.post<{ token: string; user: AuthUser }>("/auth/signup", input);
     await setStoredToken(result.token);
     setUser(result.user);

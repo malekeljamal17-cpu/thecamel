@@ -1,6 +1,7 @@
 export type AuthStackParamList = {
   Login: undefined;
   Signup: undefined;
+  PrivacyPolicy: undefined;
 };
 
 export type MainTabParamList = {
@@ -16,4 +17,5 @@ export type RootStackParamList = {
   AddMoney: undefined;
   GoalDetail: { goalId: string };
   Insurance: undefined;
+  PrivacyPolicy: undefined;
 };

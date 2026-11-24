@@ -28,6 +28,13 @@ model User {
   kycStatus         String    @default("PENDING")
   tier              String    @default("FREE")
 
+  // When the user agreed to the Privacy Policy. Required at signup — see
+  // auth.service.ts#signup — so this is only ever null for accounts created
+  // before this column existed. Law 81/2018's declaration-exemption (Art.
+  // 94) and the whole legal basis for processing this account's data rest
+  // on this timestamp existing. See docs/PRIVACY-AUDIT.md.
+  privacyConsentAt  DateTime?
+
   // Gamification snapshot — denormalized on the user for fast dashboard reads;
   // PointsEntry remains the source of truth / audit trail.
   points            Int       @default(0)

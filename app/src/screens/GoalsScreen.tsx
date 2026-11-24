@@ -57,6 +57,7 @@ export function GoalsScreen() {
       {showForm && (
         <View style={styles.form}>
           <TextInput style={styles.input} placeholder="Goal name (e.g. Umrah trip)" value={name} onChangeText={setName} />
+          <Text style={styles.hint}>Avoid including health or other sensitive details in the name.</Text>
           <TextInput
             style={styles.input}
             placeholder="Target amount (USD)"
@@ -98,6 +99,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 22, fontWeight: "800", color: colors.textPrimary },
   form: { paddingHorizontal: spacing.lg, gap: spacing.sm, marginBottom: spacing.md },
   input: { borderWidth: 1, borderColor: colors.border, borderRadius: radius.md, padding: spacing.md, backgroundColor: colors.surface },
+  hint: { fontSize: 11, color: colors.textSecondary, marginTop: -4 },
   categoryRow: { flexDirection: "row", flexWrap: "wrap", gap: spacing.xs },
   categoryChip: {
     fontSize: 11,

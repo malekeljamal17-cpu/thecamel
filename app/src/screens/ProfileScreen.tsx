@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
-import { Alert, StyleSheet, Text, View } from "react-native";
-import { useFocusEffect } from "@react-navigation/native";
+import { Alert, Share, StyleSheet, Text, View } from "react-native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../context/AuthContext";
 import { api, ApiError } from "../api/client";
@@ -9,6 +9,7 @@ import { colors, radius, spacing } from "../theme/colors";
 import { PrimaryButton } from "../components/PrimaryButton";
 
 export function ProfileScreen() {
+  const navigation = useNavigation<any>();
   const { user, logout, refreshUser } = useAuth();
   const [freshUser, setFreshUser] = useState<AuthUser | null>(user);
   const [busy, setBusy] = useState(false);
@@ -38,6 +39,46 @@ export function ProfileScreen() {
     }
   };
 
+  const onExportData = async () => {
+    setBusy(true);
+    try {
+      const data = await api.get<unknown>("/auth/me/export");
+      await Share.share({
+        title: "My Camel Finance data",
+        message: JSON.stringify(data, null, 2),
+      });
+    } catch (err) {
+      Alert.alert("Couldn't export data", err instanceof ApiError ? err.message : "Please try again.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const onDeleteAccount = () => {
+    Alert.alert(
+      "Delete your account?",
+      "This permanently deletes your account and everything in it — wallet, goals, bookings, policies. This can't be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete everything",
+          style: "destructive",
+          onPress: async () => {
+            setBusy(true);
+            try {
+              await api.del("/auth/me");
+              await logout();
+            } catch (err) {
+              Alert.alert("Couldn't delete account", err instanceof ApiError ? err.message : "Please try again.");
+            } finally {
+              setBusy(false);
+            }
+          },
+        },
+      ],
+    );
+  };
+
   const displayUser = freshUser ?? user;
   if (!displayUser) return <SafeAreaView style={styles.container} />;
 
@@ -57,6 +98,13 @@ export function ProfileScreen() {
         {displayUser.kycStatus !== "VERIFIED" && (
           <PrimaryButton label="Verify my identity" onPress={onSubmitKyc} loading={busy} />
         )}
+
+        <View style={styles.privacySection}>
+          <Text style={styles.privacyHeading}>Privacy</Text>
+          <PrimaryButton label="Privacy Policy" variant="secondary" onPress={() => navigation.navigate("PrivacyPolicy")} />
+          <PrimaryButton label="Export my data" variant="secondary" onPress={onExportData} loading={busy} />
+          <PrimaryButton label="Delete my account" variant="secondary" onPress={onDeleteAccount} loading={busy} />
+        </View>
 
         <PrimaryButton label="Log out" variant="secondary" onPress={logout} />
       </View>
@@ -83,4 +131,6 @@ const styles = StyleSheet.create({
   row: { flexDirection: "row", justifyContent: "space-between" },
   rowLabel: { color: colors.textSecondary, fontSize: 13 },
   rowValue: { color: colors.textPrimary, fontWeight: "700", fontSize: 13 },
+  privacySection: { width: "100%", gap: spacing.sm, marginTop: spacing.md },
+  privacyHeading: { fontSize: 13, fontWeight: "800", color: colors.textSecondary, textTransform: "uppercase" },
 });

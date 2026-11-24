@@ -9,6 +9,7 @@ import { SignupScreen } from "../screens/SignupScreen";
 import { AddMoneyScreen } from "../screens/AddMoneyScreen";
 import { GoalDetailScreen } from "../screens/GoalDetailScreen";
 import { InsuranceScreen } from "../screens/InsuranceScreen";
+import { PrivacyPolicyScreen } from "../screens/PrivacyPolicyScreen";
 import { TabNavigator } from "./TabNavigator";
 import type { AuthStackParamList, RootStackParamList } from "./types";
 
@@ -20,6 +21,11 @@ function AuthNavigator() {
     <AuthStack.Navigator screenOptions={{ headerShown: false }}>
       <AuthStack.Screen name="Login" component={LoginScreen} />
       <AuthStack.Screen name="Signup" component={SignupScreen} />
+      <AuthStack.Screen
+        name="PrivacyPolicy"
+        component={PrivacyPolicyScreen}
+        options={{ headerShown: true, title: "Privacy Policy" }}
+      />
     </AuthStack.Navigator>
   );
 }
@@ -31,6 +37,7 @@ function MainNavigator() {
       <RootStack.Screen name="AddMoney" component={AddMoneyScreen} options={{ title: "Add Money" }} />
       <RootStack.Screen name="GoalDetail" component={GoalDetailScreen} options={{ title: "Goal" }} />
       <RootStack.Screen name="Insurance" component={InsuranceScreen} options={{ title: "Insurance & Savings Plans" }} />
+      <RootStack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} options={{ title: "Privacy Policy" }} />
     </RootStack.Navigator>
   );
 }
