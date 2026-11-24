@@ -16,7 +16,7 @@ const adapters: Record<PaymentProvider, PaymentAdapter | null> = {
   INTERNAL: null,
 };
 
-function getAdapter(provider: PaymentProvider): PaymentAdapter {
+export function getAdapter(provider: PaymentProvider): PaymentAdapter {
   const adapter = adapters[provider];
   if (!adapter) throw new HttpError(400, `${provider} has no external adapter`);
   return adapter;

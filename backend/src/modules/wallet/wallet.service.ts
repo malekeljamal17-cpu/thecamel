@@ -26,9 +26,17 @@ export async function getWalletByUserId(userId: string) {
  * The authoritative balance change happens on the partner ledger (see
  * modules/ledger/partner.adapter.ts) — this backend never mutates a
  * custodial balance it holds itself. `Wallet.balanceCents` in our own DB
- * is a cached mirror of whatever the partner ledger reports, refreshed
- * here after every successful call; it is not written as a source of
- * truth anywhere else.
+ * is a cached mirror of whatever the partner ledger reports; it is not
+ * written as a source of truth anywhere else.
+ *
+ * After the partner call, we only re-read the wallet — we deliberately do
+ * NOT write a separately-fetched balance back here. Writing a snapshot
+ * value fetched in a second round trip would race with a concurrent
+ * adjustWalletBalance call on the same wallet: two calls' reads and writes
+ * can interleave so the call that read first (and so has the staler value)
+ * writes last, clobbering the other call's more recent, correct balance.
+ * That reintroduces exactly the check-then-act race this module's atomic
+ * credit/debit calls exist to prevent.
  */
 export async function adjustWalletBalance(walletId: string, deltaCents: number) {
   if (deltaCents >= 0) {
@@ -37,6 +45,5 @@ export async function adjustWalletBalance(walletId: string, deltaCents: number) 
     await partnerLedger.debit(walletId, -deltaCents, walletId);
   }
 
-  const freshBalanceCents = await partnerLedger.getBalance(walletId);
-  return prisma.wallet.update({ where: { id: walletId }, data: { balanceCents: freshBalanceCents } });
+  return prisma.wallet.findUniqueOrThrow({ where: { id: walletId } });
 }

@@ -4,9 +4,7 @@ import { FEATURES } from "../../config/features";
 import { computePremiumSessionFee } from "../fees/fee.service";
 import { awardBadge, awardPoints, recordActivity } from "../gamification/gamification.service";
 import { adjustWalletBalance, getWalletByUserId } from "../wallet/wallet.service";
-import { CardAdapter } from "../payments/adapters/card.adapter";
-
-const cardAdapter = new CardAdapter();
+import { getAdapter } from "../payments/payments.service";
 
 const BUSINESS_HOURS = { startHour: 9, endHour: 17 }; // 9am–5pm, Beirut time is assumed app-side
 const SLOT_MINUTES = 30;
@@ -109,7 +107,7 @@ export async function confirmBooking(userId: string, bookingId: string, cardDeta
     // one-off card charge — ordinary merchant payment processing, which
     // (unlike holding a customer balance) doesn't require an e-money
     // license. See docs/PHASED-LAUNCH.md.
-    const result = await cardAdapter.charge({
+    const result = await getAdapter("CARD").charge({
       amountCents: booking.feeCents,
       currency: wallet.currency,
       reference: booking.id,
