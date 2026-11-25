@@ -48,3 +48,16 @@ To flip it: set `FEATURE_WALLET_ENABLED=true` in the backend's `.env` and
 `walletEnabled: true` in `app/src/config/features.ts`, then replace
 `MockPartnerLedgerAdapter` with a real implementation calling the
 partner's actual ledger API.
+
+**One more prerequisite before that flip, found during the privacy audit
+(`docs/PRIVACY-AUDIT.md`):** once there's a real licensed banking
+relationship, `auth.service.ts#deleteAccount` can no longer do a full,
+immediate erasure for wallet data. Law 44/2015 (AML), via BDL circulars,
+requires a regulated financial institution to keep customer account and
+transaction records for five years after the account closes. Phase 2
+needs `deleteAccount` to branch: anonymize the user's profile immediately
+(name/email/phone, free-text goal names and booking topics), but retain
+`Wallet`/`Transaction` rows for that five-year window before a purge job
+deletes them for good. Not built yet — tracked here so it isn't
+discovered for the first time after the wallet is already live.
+

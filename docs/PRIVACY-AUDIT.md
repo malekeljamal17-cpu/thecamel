@@ -153,13 +153,36 @@ Every numbered gap above was closed on this branch:
 5. **Insurance referral scope** — unchanged by design; already didn't
    collect health data, and the new privacy policy now says so
    explicitly instead of leaving it implicit.
-6. **Retention policy** — stated in the privacy policy: kept until
-   account deletion, with a placeholder for a longer mandatory retention
-   period if Lebanese financial recordkeeping rules require one once
-   wallet/KYC features are live.
-7. **Cross-border hosting disclosure** — still genuinely not fixable
-   until real hosting is chosen (there's nothing true to disclose yet).
-   The privacy policy now has a dedicated section committing to name the
-   host and country once one exists, so this isn't silently missing —
-   it's an explicit, visible placeholder.
+6. **Retention policy — researched and made concrete.** Law 81/2018 sets
+   no fixed retention term itself (Art. 90 ties retention to the purpose
+   declared for the processing; a Council of Europe study reads this as
+   a storage-limitation principle, not a number). The real number comes
+   from a different statute: Law 44/2015 on Anti-Money Laundering, as
+   implemented through Banque du Liban circulars (e.g. Circular 633 under
+   Law 44 Art. 4), requires a regulated financial institution to retain
+   customer account and transaction records for **five years after the
+   account closes**. Today, in Phase 1, that doesn't apply — there's no
+   licensed banking relationship yet (see `PHASED-LAUNCH.md`), so
+   `deleteAccount` correctly does a full, immediate erasure, and the
+   policy now says so plainly instead of hedging. This becomes a real
+   Phase 2 build item: once a licensed banking/e-wallet partner is
+   integrated, account deletion needs to anonymize the user's profile
+   immediately while retaining wallet/transaction records (with any free
+   text like goal names or booking topics scrubbed) for five years before
+   a purge — **not implemented yet**, deliberately, the same way
+   `MockPartnerLedgerAdapter` stands in for a partner integration that
+   doesn't exist yet rather than guessing at its exact shape. Tracked as
+   a concrete prerequisite before `FEATURE_WALLET_ENABLED` is ever set to
+   `true` for real.
+7. **Cross-border hosting disclosure.** Researched and still genuinely
+   unresolved: legal commentary is split on whether Law 81/2018 directly
+   regulates sending data outside Lebanon at all (DLA Piper's profile
+   says the law is silent on transfers; another summary describes
+   adequacy/safeguard/consent conditions that couldn't be verified
+   against the statute itself). Rather than pick a reading to justify
+   skipping the question, the privacy policy now states that split
+   directly and commits to naming the real host/country and applying
+   real safeguards once infrastructure exists — there's still nothing
+   true to disclose today, so this remains a placeholder, just a more
+   honestly-reasoned one than before.
 

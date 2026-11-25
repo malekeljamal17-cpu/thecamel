@@ -37,10 +37,16 @@ export function PrivacyPolicyScreen() {
       </Section>
 
       <Section title="How long we keep it">
-        Until you delete your account, at which point everything you own is permanently deleted (see "Your rights").
-        We don't currently have a separate shorter retention schedule — if Lebanese financial recordkeeping rules
-        require certain transaction records to be kept longer once wallet/KYC features are live, that requirement
-        will be added here and will override your deletion request only to that limited extent.
+        Today, until you delete your account — Phase 1 (see docs/PHASED-LAUNCH.md in the project repo) doesn't
+        involve a licensed banking relationship, so "Delete my account" erases everything immediately, with nothing
+        held back. Law 81/2018 itself sets no fixed retention term (Art. 90 ties it to the purpose declared for the
+        processing), so this immediate deletion is the real policy, not a placeholder.{"\n\n"}
+        This will change for wallet data specifically once a licensed banking/e-wallet partner is integrated: Law
+        44/2015 on Anti-Money Laundering, as implemented through Banque du Liban circulars, requires a regulated
+        financial institution to keep customer account and transaction records for five years after the account
+        closes. From that point on, deleting your account will anonymize your profile immediately but keep
+        wallet/transaction records (not readable goal names or coaching-session topics, which are scrubbed) for that
+        five-year window before they're purged for good.
       </Section>
 
       <Section title="Your rights">
@@ -50,9 +56,13 @@ export function PrivacyPolicyScreen() {
       </Section>
 
       <Section title="Where this is hosted">
-        During development, this runs on infrastructure you control directly. Before this app is used by anyone
-        other than its developers, this section will name the actual hosting provider and country, since that's a
-        cross-border transfer disclosure Law 81/2018 expects.
+        During development, this runs on infrastructure you control directly — there's no real host to name yet, so
+        we're not going to pretend there is one. Legal commentary is split on whether Law 81/2018 even directly
+        regulates sending personal data outside Lebanon; some readings describe conditions (an adequately protective
+        destination country, safeguards, your explicit consent, or government approval), others say the law is
+        silent. Either way, once this runs on real infrastructure, this section will name the actual provider and
+        country and will only use a host with real security/data-protection commitments — not just whatever's
+        cheapest.
       </Section>
 
       <Section title="Questions">
